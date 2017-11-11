@@ -30,13 +30,23 @@ def main(argv):
         nb.name = notebook_title
         notebook = noteStore.createNotebook(authToken, nb)
 
-    for post in os.listdir(post_dir):
-        date = re.search("([0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2})", post).group(1)
-        basename, ext = os.path.splitext(post)
+    create_notes(post_dir, notebook, noteStore, authToken)
+
+def create_notes(dir, notebook, noteStore, authToken):
+    for fname in os.listdir(dir):
+        fullpath = os.path.join(dir, fname)
+        if os.path.isfile(fullpath):
+            create_note(dir, fname, notebook, noteStore, authToken)
+        elif os.path.isdir(fullpath):
+            create_notes(fullpath, notebook, noteStore, authToken)
+
+def create_note(dir, fname, notebook, noteStore, authToken):
+        date = re.search("([0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2})", fname).group(1)
+        basename, ext = os.path.splitext(fname)
         title = to_title(basename[(len(date) + 1):])
 
-        post_fullpath = os.path.join(os.getcwd(), post_dir, post)
-        with open(post_fullpath) as f:
+        fullpath = os.path.join(os.getcwd(), dir, fname)
+        with open(fullpath) as f:
             content = f.read()
 
         note = Types.Note()
